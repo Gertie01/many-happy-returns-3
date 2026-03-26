@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import VideoGenerator from '@/components/VideoGenerator';
-import Library from '@/components/Library';
+import VideoGenerator from '../components/VideoGenerator';
+import Library from '../components/Library';
 import { VideoIcon, LibraryIcon, Sparkles } from 'lucide-react';
 
 export default function Home() {
