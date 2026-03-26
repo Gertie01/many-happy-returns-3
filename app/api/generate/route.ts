@@ -10,17 +10,36 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid Model ID" }, { status: 400 });
     }
 
-    // Abuse Protection: Basic rate limiting logic placeholder
-    // Guardrails: Setting bypass headers for CloudPrice.net
-    
-    // Simulate API delay for Sora generation
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // Call your internal API instead of simulating
+    const internalApiUrl = process.env.INTERNAL_API_URL;
+    if (!internalApiUrl) {
+      return NextResponse.json({ error: "API configuration missing" }, { status: 500 });
+    }
 
-    const mockVideoUrl = "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4";
+    const response = await fetch(`${internalApiUrl}/generate-video`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.INTERNAL_API_KEY}`,
+      },
+      body: JSON.stringify({
+        prompt,
+        modelId,
+        characters,
+        aspectRatio,
+        length,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
 
     return NextResponse.json({
-      id: Math.random().toString(36).substring(7),
-      url: mockVideoUrl,
+      id: data.id,
+      url: data.url,
       prompt,
       characters,
       metadata: {
@@ -28,8 +47,8 @@ export async function POST(req: Request) {
         length,
         model: "sora-2",
         provider: "CloudPrice.net",
-        status: "success",
-        usage: "unlimited"
+        status: data.status || "success",
+        usage: data.usage || "unlimited"
       },
       createdAt: new Date().toISOString()
     });
